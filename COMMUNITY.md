@@ -28,10 +28,11 @@ The requirement for this fork is that downloading and using it must not consume 
 - The only AI hosts in the compiled bundle are `api.openai.com`, `api.anthropic.com`, and `generativelanguage.googleapis.com`. Each request requires a key that the user entered on their own device.
 - The app ships with no API key of any kind, and `api-key-store.ts` reads only what the user saved through Settings.
 - Nothing in the fork is routed through Manus, so there is no path by which usage on a downloaded APK reaches the author's account.
+- The build-time identity leak was found and closed. `scripts/load-env.js` mapped the author's name and account id into `EXPO_PUBLIC_*` variables, and Expo inlines every `EXPO_PUBLIC_*` value it can resolve into the JavaScript bundle. Because this app is distributed publicly as an APK, that mapping was removed. The re-exported bundle was then searched for the author's name, account id, owner variables, Manus endpoints, sandbox hosts, and platform credentials; **none are present.**
 
 The one owner-funded dependency that could not be fully removed is the app logo, which is served from a static file host referenced by `app.config.ts`. It is only a branding asset — never requested at runtime with credentials, and never billable. It can be pointed at any URL, or emptied to fall back to the bundled icon.
 
-`__tests__/no-owner-funding.test.ts` enforces these guarantees over the source tree so a future edit cannot quietly reintroduce an owner-funded path.
+`__tests__/no-owner-funding.test.ts` enforces these guarantees over the source tree and the build scripts, and asserts that the platform's `.project-config.json` (which contains the author's name and account id) stays out of version control.
 
 ## Supported providers
 
@@ -79,7 +80,7 @@ Baseline validation of the source archive was re-run inside this managed project
 | Check | Result |
 |---|---|
 | `pnpm check` (TypeScript) | Pass |
-| `pnpm test` (Vitest) | 54 passed, 1 skipped |
+| `pnpm test` (Vitest) | 60 passed, 1 skipped |
 | `pnpm lint` (Expo ESLint) | Pass |
 | `npx -y expo-doctor` | 18/18 checks passed |
 | `pnpm build` (server bundle) | Pass |
