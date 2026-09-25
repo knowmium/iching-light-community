@@ -60,7 +60,25 @@ Each is an independent switch in **Settings**, so you can run just the one you w
 
 ## Install (Android APK)
 
-Releases are published from this repository. Download the APK, allow installation from that source, and open it. The Android package is `com.app.ichinglightcommunity` — distinct from the author's personal edition, so both can be installed side by side.
+Download the APK from the [Releases page](https://github.com/knowmium/iching-light-community/releases), allow installation from that source, and open it. The Android package is `com.app.ichinglightcommunity` — distinct from the author's personal edition, so both can be installed side by side.
+
+The APK is signed with a 2048-bit RSA release key. Verify a download with:
+
+```bash
+apksigner verify --print-certs iching-light-community-release.apk
+```
+
+## Build the APK yourself (no Expo account needed)
+
+EAS Build is Expo's paid cloud service and requires an authenticated Expo account and an `EXPO_TOKEN`. **It is optional.** The release APK for this project is built entirely locally:
+
+```bash
+ANDROID_HOME=/path/to/android-sdk ./scripts/build-apk-local.sh
+```
+
+That script runs `expo prebuild` to generate the native project, creates a local signing key, and compiles with Gradle. Nothing contacts EAS, and no Expo token is required. You need a full JDK with `javac` (OpenJDK 17 is what Android's toolchain targets — a JRE alone is not sufficient) and an Android SDK containing platform-tools, a platform, build-tools, an NDK, and cmake.
+
+> Downloading a finished APK never generates any Expo charge. This app has no over-the-air update mechanism (`expo-updates` is not installed), so there is no billing path tied to installs or usage. The only costs a user can incur are the ones they deliberately create with their own AI provider key.
 
 ---
 
@@ -71,7 +89,7 @@ Requires Node.js 20+ and pnpm.
 ```bash
 pnpm install
 pnpm dev          # Expo web preview + local API server
-pnpm android      # Expo Go / dev build on a connected device
+pnpm android      # Build and run on a connected device
 ```
 
 Useful checks:
