@@ -5,10 +5,10 @@ import { ScreenContainer } from '@/components/screen-container';
 import { isCompactOracleWindow } from '@/lib/layout';
 
 /**
- * Home Screen - I Ching Light for LightPhone 3
- * 
+ * Home Screen - I Ching Light
+ *
  * Pure black/white minimalist design with clean typography
- * Optimized for 1080x1240 screen (tighter spacing)
+ * Optimized for the near-square Titan 2 Elite display (1080x1200)
  */
 export default function HomeScreen() {
   const router = useRouter();
@@ -45,7 +45,6 @@ export default function HomeScreen() {
           {/* Header */}
           <View style={[styles.header, isCompact && styles.headerCompact]}>
             <Text style={[styles.title, isCompact && styles.titleCompact]}>I Ching</Text>
-            <Text style={[styles.subtitle, isCompact && styles.subtitleCompact]}>COMMUNITY</Text>
           </View>
 
           {/* Question Input */}
@@ -128,18 +127,6 @@ const styles = StyleSheet.create({
   },
   titleCompact: {
     fontSize: 32,
-  },
-  subtitle: {
-    fontSize: 12,
-    fontWeight: '400',
-    color: '#888888',
-    letterSpacing: 5,
-    marginTop: 4,
-    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
-  },
-  subtitleCompact: {
-    fontSize: 11,
-    letterSpacing: 4,
   },
   inputContainer: {
     borderWidth: 1,
