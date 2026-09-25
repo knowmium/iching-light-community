@@ -6,6 +6,7 @@ node_modules/
 # Expo
 .expo/
 dist/
+dist-android/
 web-build/
 expo-env.d.ts
 
@@ -32,6 +33,10 @@ yarn-error.*
 
 # local env files
 .env*.local
+# Never publish provider keys or deployment environment files.
+/.env
+/.env.*
+!/env.example
 
 # typescript
 *.tsbuildinfo
