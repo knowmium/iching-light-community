@@ -1,7 +1,15 @@
 /**
- * Custom environment loader that prioritizes system environment variables
- * over .env file values. This ensures that Manus platform-injected variables
- * are not overridden by placeholder values in .env
+ * Local environment loader for this fork.
+ *
+ * It loads a local `.env` file if one exists, giving real environment variables
+ * priority so they are never shadowed by placeholder values.
+ *
+ * This fork deliberately does NOT map any platform-injected owner variable into
+ * an `EXPO_PUBLIC_*` variable. Expo inlines every `EXPO_PUBLIC_*` value it can
+ * see into the JavaScript bundle, and this app is published publicly as an APK.
+ * Exposing the author's identity or any account identifier in a distributed
+ * build would be both a privacy leak and a security risk, so the mapping was
+ * removed rather than merely left unused.
  */
 import fs from "fs";
 import path from "path";
@@ -25,25 +33,10 @@ if (fs.existsSync(envPath)) {
       const key = match[1].trim();
       const value = match[2].trim().replace(/^["']|["']$/g, ""); // Remove quotes
 
-      // Only set if not already defined in environment
+      // Only set if not already defined in the environment
       if (!process.env[key]) {
         process.env[key] = value;
       }
     }
   });
-}
-
-// Map system variables to Expo public variables
-const mappings = {
-  VITE_APP_ID: "EXPO_PUBLIC_APP_ID",
-  VITE_OAUTH_PORTAL_URL: "EXPO_PUBLIC_OAUTH_PORTAL_URL",
-  OAUTH_SERVER_URL: "EXPO_PUBLIC_OAUTH_SERVER_URL",
-  OWNER_OPEN_ID: "EXPO_PUBLIC_OWNER_OPEN_ID",
-  OWNER_NAME: "EXPO_PUBLIC_OWNER_NAME",
-};
-
-for (const [systemVar, expoVar] of Object.entries(mappings)) {
-  if (process.env[systemVar] && !process.env[expoVar]) {
-    process.env[expoVar] = process.env[systemVar];
-  }
 }

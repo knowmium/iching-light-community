@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -111,5 +112,43 @@ describe('client sources stay bring-your-own-key', () => {
       }
     }
     expect(offenders).toEqual([]);
+  });
+
+  it('never exposes the author identity as an inlinable public variable', () => {
+    // Expo inlines every EXPO_PUBLIC_* value it can resolve into the bundle.
+    // A public APK must not carry the author's name or account identifier.
+    //
+    // Only files that can actually be published are considered: the platform's
+    // own .project-config.json is gitignored and never ships, so it is out of
+    // scope for a distribution guard.
+    const offenders: string[] = [];
+
+    for (const file of collectSourceFiles(path.join(ROOT, 'scripts'))) {
+      const source = readFileSync(file, 'utf8');
+      const relative = path.relative(ROOT, file);
+
+      // Mapping an account identity into a public variable is the bug we guard against.
+      if (/OWNER_(NAME|OPEN_ID)/.test(source) && /EXPO_PUBLIC/.test(source)) {
+        offenders.push(`${relative} -> maps owner identity into EXPO_PUBLIC_*`);
+      }
+      if (/EXPO_PUBLIC_OWNER_/.test(source)) {
+        offenders.push(`${relative} -> references EXPO_PUBLIC_OWNER_*`);
+      }
+    }
+
+    expect(offenders).toEqual([]);
+  });
+
+  it('keeps the platform project config out of version control', () => {
+    // .project-config.json carries the author's name and account id. It is
+    // injected by the build platform, so it must stay gitignored.
+    const ignoreRules = readFileSync(path.join(ROOT, '.gitignore'), 'utf8');
+    expect(ignoreRules).toContain('.project-config.json');
+
+    const tracked = execFileSync('git', ['ls-files', '--', '.project-config.json'], {
+      cwd: ROOT,
+      encoding: 'utf8',
+    }).trim();
+    expect(tracked).toBe('');
   });
 });
